@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>LUNK | Pedidos rápidos</title>
+  <meta name="description" content="Pide lo que necesites y recíbelo en tu puerta. Tu pedido llega directo al WhatsApp del delivery." />
+
+  <!-- Móvil: viewport-fit=cover permite usar toda la pantalla, incluso junto al notch -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0A0F0D" />
+
+  <!-- PWA: Android / Chrome -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+
+  <!-- PWA: iPhone / iPad (el icono PNG se genera más abajo, porque iOS no admite SVG aquí) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LUNK" />
+  <link id="icono-apple" rel="apple-touch-icon" href="icon.svg" />
+
+  <!-- Evita el destello blanco mientras carga Tailwind -->
+  <style>html, body { background: #0A0F0D; }</style>
+
+  <!-- Tailwind por CDN: sin instalación, ideal para probar de inmediato -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fondo: '#0A0F0D',
+            tarjeta: '#141B18',
+            borde: '#2A3530',
+            texto: '#F2F6F4',
+            suave: '#A3B1AA',
+            acento: '#22E58B',
+            peligro: '#FF8A8A',
+          },
+          boxShadow: {
+            suave: '0 8px 24px rgba(0, 0, 0, 0.35)',
+            acento: '0 10px 28px rgba(34, 229, 139, 0.28)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer components {
+      .tarjeta {
+        @apply rounded-3xl border border-borde bg-tarjeta p-5 shadow-suave;
+      }
+      .etiqueta {
+        @apply mb-3 flex items-center gap-2 text-base font-semibold text-texto;
+      }
+      .opcional {
+        @apply ml-auto text-sm font-normal text-suave;
+      }
+      /* text-base (16px) evita que iOS haga zoom automático al tocar un campo */
+      .campo {
+        @apply w-full rounded-2xl border border-borde bg-fondo px-4 py-4 text-base text-texto
+               placeholder:text-suave/70 outline-none transition
+               focus:border-acento focus:ring-2 focus:ring-acento/30
+               aria-[invalid=true]:border-peligro;
+      }
+      .categoria {
+        @apply flex min-h-[64px] items-center gap-3 rounded-2xl border border-borde bg-fondo px-4 py-3
+               text-base font-medium text-texto transition active:scale-[0.98]
+               peer-checked:border-acento peer-checked:bg-acento/15
+               peer-focus-visible:ring-2 peer-focus-visible:ring-acento;
+      }
+      .error {
+        @apply mt-2 text-sm font-medium text-peligro empty:hidden;
+      }
+    }
+
+    /* Respeta las zonas seguras (notch y barra inferior del teléfono) */
+    .zona-superior { padding-top: calc(env(safe-area-inset-top) + 1.5rem); }
+    .zona-inferior { padding-bottom: calc(env(safe-area-inset-bottom) + 0.875rem); }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-fondo font-sans text-texto antialiased">
+
+  <div class="mx-auto max-w-md px-4">
+
+    <!-- ENCABEZADO -->
+    <header class="zona-superior pb-6">
+      <div class="flex items-center gap-3">
+        <svg class="h-11 w-11 rounded-xl" viewBox="0 0 512 512" aria-hidden="true">
+          <rect width="512" height="512" fill="#141B18" />
+          <path d="M190 130V340H340" fill="none" stroke="#22E58B" stroke-width="72" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="340" cy="170" r="42" fill="#F2F6F4" />
+        </svg>
+        <span data-nombre-app class="text-2xl font-extrabold tracking-tight">LUNK</span>
+      </div>
+      <h1 class="mt-5 text-3xl font-bold leading-tight">¿Qué necesitas que te llevemos hoy?</h1>
+      <p class="mt-2 text-base text-suave">Completa tus datos y tu pedido llegará directo al WhatsApp del delivery.</p>
+    </header>
+
+    <!-- FORMULARIO -->
+    <form id="formulario" novalidate class="space-y-4 pb-44">
+
+      <!-- Campo 1: Nombre -->
+      <div class="tarjeta">
+        <label for="nombre" class="etiqueta">👤 Nombre y apellido</label>
+        <input id="nombre" name="nombre" type="text" class="campo" maxlength="80"
+               autocomplete="name" autocapitalize="words" enterkeyhint="next"
+               placeholder="Ej: María Gómez" aria-describedby="error-nombre" />
+        <p id="error-nombre" class="error"></p>
+      </div>
+
+      <!-- Campo 2: Teléfono -->
+      <div class="tarjeta">
+        <label for="telefono" class="etiqueta">📞 Teléfono de contacto</label>
+        <input id="telefono" name="telefono" type="tel" class="campo" maxlength="25"
+               inputmode="tel" autocomplete="tel" enterkeyhint="next"
+               placeholder="Ej: 11 2345 6789" aria-describedby="error-telefono" />
+        <p id="error-telefono" class="error"></p>
+      </div>
+
+      <!-- Campo 3: Categoría (radios reales: funcionan con teclado y lector de pantalla) -->
+      <fieldset class="tarjeta" aria-describedby="error-categoria">
+        <legend class="sr-only">Tipo de pedido</legend>
+        <p class="etiqueta" aria-hidden="true">🏷️ ¿Qué tipo de pedido es?</p>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" name="categoria" value="🛒 Mandados / Super" class="peer sr-only"
+                   data-ejemplo="Ej: 1 kg de pan, 2 leches y un paquete de yerba" />
+            <span class="categoria"><span class="text-2xl" aria-hidden="true">🛒</span> Mandados / Super</span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="categoria" value="💊 Farmacia" class="peer sr-only"
+                   data-ejemplo="Ej: Ibuprofeno 400 mg y alcohol en gel. Avísame si necesitan receta" />
+            <span class="categoria"><span class="text-2xl" aria-hidden="true">💊</span> Farmacia</span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="categoria" value="📦 Paquetes" class="peer sr-only"
+                   data-ejemplo="Ej: Una caja mediana. Hay que entregarla a Juan Pérez" />
+            <span class="categoria"><span class="text-2xl" aria-hidden="true">📦</span> Paquetes</span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="categoria" value="🍔 Comida" class="peer sr-only"
+                   data-ejemplo="Ej: 2 hamburguesas completas y una gaseosa de 1,5 litros" />
+            <span class="categoria"><span class="text-2xl" aria-hidden="true">🍔</span> Comida</span>
+          </label>
+          <label class="col-span-2 cursor-pointer">
+            <input type="radio" name="categoria" value="❓ Otro" class="peer sr-only"
+                   data-ejemplo="Cuéntanos con detalle qué necesitas" />
+            <span class="categoria"><span class="text-2xl" aria-hidden="true">❓</span> Otro</span>
+          </label>
+        </div>
+        <p id="error-categoria" class="error"></p>
+      </fieldset>
+
+      <!-- Campo 4: Descripción -->
+      <div class="tarjeta">
+        <label for="descripcion" class="etiqueta">📝 ¿Qué necesitas?</label>
+        <textarea id="descripcion" name="descripcion" rows="4" class="campo resize-none" maxlength="800"
+                  placeholder="Escribe aquí todo lo que necesitas, con cantidades y detalles"
+                  aria-describedby="error-descripcion"></textarea>
+        <p id="error-descripcion" class="error"></p>
+      </div>
+
+      <!-- Campo 5: Origen (opcional) -->
+      <div class="tarjeta">
+        <label for="origen" class="etiqueta">🏪 ¿Dónde lo buscamos? <span class="opcional">Opcional</span></label>
+        <input id="origen" name="origen" type="text" class="campo" maxlength="120" enterkeyhint="next"
+               placeholder="Ej: Farmacia del Pueblo o A criterio" />
+      </div>
+
+      <!-- Campo 6: Dirección -->
+      <div class="tarjeta">
+        <label for="direccion" class="etiqueta">📍 ¿A dónde lo llevamos?</label>
+        <textarea id="direccion" name="direccion" rows="2" class="campo resize-none" maxlength="200"
+                  autocomplete="street-address"
+                  placeholder="Calle, número y referencias. Ej: San Martín 123, casa con portón verde, frente a la plaza"
+                  aria-describedby="error-direccion"></textarea>
+        <p id="error-direccion" class="error"></p>
+      </div>
+
+      <!-- BARRA INFERIOR FIJA: progreso y botón principal -->
+      <div class="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-fondo via-fondo to-fondo/0 pt-8">
+        <div class="zona-inferior mx-auto max-w-md px-4">
+          <p id="aviso" role="alert" class="mb-2 hidden rounded-xl border border-peligro/40 bg-tarjeta px-3 py-2 text-sm font-medium text-peligro"></p>
+
+          <div class="mb-2 flex items-center gap-3">
+            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-borde">
+              <div id="barra-progreso" class="h-full w-0 rounded-full bg-acento transition-all duration-300"></div>
+            </div>
+            <span id="texto-progreso" class="text-sm text-suave" aria-live="polite"></span>
+          </div>
+
+          <button type="submit"
+                  class="w-full rounded-2xl bg-acento px-5 py-[18px] text-lg font-bold text-fondo shadow-acento transition active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-acento/50">
+            📦 Enviar Pedido por WhatsApp
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- PANTALLA FINAL: wa.me solo deja el mensaje escrito; el cliente aún debe tocar "Enviar" -->
+    <section id="pantalla-final" class="hidden pb-10" aria-labelledby="titulo-final" tabindex="-1">
+      <div class="tarjeta text-center">
+        <div class="text-5xl" aria-hidden="true">💬</div>
+        <h2 id="titulo-final" class="mt-4 text-2xl font-bold">Ya casi está</h2>
+        <p class="mt-2 text-base text-suave">
+          Tu pedido está escrito en WhatsApp. <strong class="text-texto">Toca “Enviar” allí</strong> para que le llegue al delivery.
+        </p>
+        <a id="abrir-whatsapp" href="#"
+           class="mt-6 block rounded-2xl bg-acento px-5 py-[18px] text-lg font-bold text-fondo shadow-acento">
+          Abrir WhatsApp de nuevo
+        </a>
+        <button id="nuevo-pedido" type="button"
+                class="mt-3 w-full rounded-2xl border border-borde px-5 py-4 text-base font-semibold text-texto">
+          Hacer otro pedido
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* =====================================================================
+       CONFIGURACIÓN: cambia aquí los datos de tu servicio
+       ===================================================================== */
+    const CONFIG = {
+      // Número del delivery en formato internacional: solo dígitos, sin "+" ni espacios.
+      // Ejemplo Argentina: 54 + 9 + código de área + número = "5491123456789"
+      numeroDelivery: '5490000000000',
+
+      // Nombre visible en la app y en el mensaje.
+      // Si lo cambias, edítalo también en manifest.webmanifest y en las etiquetas <title> y apple-mobile-web-app-title.
+      nombreApp: 'LUNK',
+    };
+
+    // Valor de ejemplo: mientras siga puesto, la app no intentará abrir WhatsApp.
+    const NUMERO_DE_EJEMPLO = '5490000000000';
+
+    /* =====================================================================
+       REFERENCIAS Y REGLAS DE VALIDACIÓN
+       ===================================================================== */
+    const formulario = document.getElementById('formulario');
+    const pantallaFinal = document.getElementById('pantalla-final');
+    const aviso = document.getElementById('aviso');
+    const barraProgreso = document.getElementById('barra-progreso');
+    const textoProgreso = document.getElementById('texto-progreso');
+    const descripcion = document.getElementById('descripcion');
+    const textoDescripcionInicial = descripcion.placeholder;
+
+    // Lee un valor del formulario, sin espacios sobrantes
+    const leer = (nombre) => (formulario.elements[nombre].value || '').trim();
+
+    // Campos obligatorios: cada uno indica cómo validarse y qué decirle al usuario
+    const OBLIGATORIOS = {
+      nombre: {
+        esValido: (valor) => valor.length >= 2,
+        mensaje: 'Escribe tu nombre y apellido.',
+      },
+      telefono: {
+        esValido: (valor) => {
+          const digitos = valor.replace(/\D/g, '').length;
+          return digitos >= 6 && digitos <= 15;
+        },
+        mensaje: 'Escribe un teléfono válido para poder contactarte.',
+      },
+      categoria: {
+        esValido: (valor) => valor !== '',
+        mensaje: 'Elige el tipo de pedido.',
+      },
+      descripcion: {
+        esValido: (valor) => valor !== '',
+        mensaje: 'Cuéntanos qué necesitas.',
+      },
+      direccion: {
+        esValido: (valor) => valor !== '',
+        mensaje: 'Escribe la dirección de entrega.',
+      },
+    };
+
+    /* =====================================================================
+       VALIDACIÓN Y PROGRESO
+       ===================================================================== */
+    function mostrarError(nombre, mensaje) {
+      const error = document.getElementById(`error-${nombre}`);
+      error.textContent = mensaje; // Sin texto, el párrafo se oculta solo (empty:hidden)
+
+      // La categoría es un grupo de radios y se marca solo con el texto de error
+      if (nombre !== 'categoria') {
+        formulario.elements[nombre].setAttribute('aria-invalid', mensaje ? 'true' : 'false');
+      }
+    }
+
+    // Devuelve el primer campo con error para poder llevar al usuario hasta él
+    function validarFormulario() {
+      let primeroConError = null;
+
+      for (const [nombre, regla] of Object.entries(OBLIGATORIOS)) {
+        const valido = regla.esValido(leer(nombre));
+        mostrarError(nombre, valido ? '' : regla.mensaje);
+        if (!valido && !primeroConError) primeroConError = nombre;
+      }
+      return primeroConError;
+    }
+
+    function irAlCampo(nombre) {
+      const elemento = nombre === 'categoria'
+        ? formulario.querySelector('input[name="categoria"]')
+        : formulario.elements[nombre];
+
+      elemento.focus({ preventScroll: true });
+      elemento.closest('.tarjeta').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function actualizarProgreso() {
+      const reglas = Object.entries(OBLIGATORIOS);
+      const completos = reglas.filter(([nombre, regla]) => regla.esValido(leer(nombre))).length;
+      const faltan = reglas.length - completos;
+
+      barraProgreso.style.width = `${(completos / reglas.length) * 100}%`;
+      textoProgreso.textContent =
+        faltan === 0 ? '¡Listo para enviar!' : faltan === 1 ? 'Falta 1 dato' : `Faltan ${faltan} datos`;
+    }
+
+    function mostrarAviso(mensaje) {
+      aviso.textContent = mensaje;
+      aviso.classList.toggle('hidden', !mensaje);
+    }
+
+    /* =====================================================================
+       MENSAJE Y ENLACE DE WHATSAPP
+       ===================================================================== */
+    function construirMensaje() {
+      return [
+        `📦 *NUEVO PEDIDO - ${CONFIG.nombreApp}*`,
+        '',
+        `👤 *Cliente:* ${leer('nombre')}`,
+        `📞 *Teléfono:* ${leer('telefono')}`,
+        `🏷️ *Categoría:* ${leer('categoria')}`,
+        '',
+        '📝 *Pedido:*',
+        leer('descripcion'),
+        '',
+        `🏪 *Buscar en:* ${leer('origen') || 'A criterio'}`,
+        `📍 *Entregar en:* ${leer('direccion')}`,
+      ].join('\n');
+    }
+
+    function construirEnlace() {
+      const numero = CONFIG.numeroDelivery.replace(/\D/g, '');
+      return `https://wa.me/${numero}?text=${encodeURIComponent(construirMensaje())}`;
+    }
+
+    /* =====================================================================
+       DATOS RECORDADOS: nombre, teléfono y dirección quedan solo en este
+       teléfono, para no volver a escribirlos en el próximo pedido
+       ===================================================================== */
+    const CLAVE_CLIENTE = 'lunk-cliente';
+    const CAMPOS_RECORDADOS = ['nombre', 'telefono', 'direccion'];
+
+    function guardarCliente() {
+      try {
+        const datos = Object.fromEntries(CAMPOS_RECORDADOS.map((campo) => [campo, leer(campo)]));
+        localStorage.setItem(CLAVE_CLIENTE, JSON.stringify(datos));
+      } catch { /* Sin almacenamiento disponible: la app sigue funcionando igual */ }
+    }
+
+    function cargarCliente() {
+      try {
+        const datos = JSON.parse(localStorage.getItem(CLAVE_CLIENTE)) || {};
+        CAMPOS_RECORDADOS.forEach((campo) => {
+          if (datos[campo]) formulario.elements[campo].value = datos[campo];
+        });
+      } catch { /* Datos ausentes o dañados: se empieza con el formulario vacío */ }
+    }
+
+    /* =====================================================================
+       EVENTOS
+       ===================================================================== */
+    formulario.addEventListener('submit', (evento) => {
+      evento.preventDefault();
+      mostrarAviso('');
+
+      const campoConError = validarFormulario();
+      if (campoConError) {
+        irAlCampo(campoConError);
+        return;
+      }
+
+      if (CONFIG.numeroDelivery === NUMERO_DE_EJEMPLO) {
+        mostrarAviso('Falta configurar el número del delivery en CONFIG (index.html).');
+        return;
+      }
+
+      if (!navigator.onLine) {
+        mostrarAviso('No tienes conexión. Revisa tu internet y vuelve a intentarlo.');
+        return;
+      }
+
+      const enlace = construirEnlace();
+      guardarCliente();
+
+      // Se prepara la pantalla final para que esté lista cuando el cliente vuelva de WhatsApp
+      document.getElementById('abrir-whatsapp').href = enlace;
+      formulario.classList.add('hidden');
+      pantallaFinal.classList.remove('hidden');
+      window.scrollTo(0, 0);
+
+      window.location.href = enlace;
+    });
+
+    // Al corregir un campo, su error desaparece y se actualiza el progreso
+    formulario.addEventListener('input', (evento) => {
+      const nombre = evento.target.name;
+      const regla = OBLIGATORIOS[nombre];
+      if (regla && regla.esValido(leer(nombre))) mostrarError(nombre, '');
+      mostrarAviso('');
+      actualizarProgreso();
+    });
+
+    // El ejemplo de la descripción cambia según la categoría elegida
+    formulario.addEventListener('change', (evento) => {
+      if (evento.target.name === 'categoria') {
+        descripcion.placeholder = evento.target.dataset.ejemplo;
+      }
+    });
+
+    // Enter en un campo de una línea no debe enviar el pedido antes de tiempo
+    formulario.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Enter' && evento.target.tagName === 'INPUT') {
+        evento.preventDefault();
+      }
+    });
+
+    // Otro pedido: se limpia el pedido y se conservan los datos del cliente
+    document.getElementById('nuevo-pedido').addEventListener('click', () => {
+      formulario.querySelectorAll('input[name="categoria"]').forEach((radio) => { radio.checked = false; });
+      formulario.elements.descripcion.value = '';
+      formulario.elements.origen.value = '';
+      descripcion.placeholder = textoDescripcionInicial;
+
+      pantallaFinal.classList.add('hidden');
+      formulario.classList.remove('hidden');
+      actualizarProgreso();
+      window.scrollTo(0, 0);
+    });
+
+    /* =====================================================================
+       PWA
+       ===================================================================== */
+    // iOS necesita un icono PNG: se dibuja aquí a partir del mismo diseño de icon.svg
+    function crearIconoApple() {
+      try {
+        const lienzo = document.createElement('canvas');
+        lienzo.width = lienzo.height = 180;
+        const ctx = lienzo.getContext('2d');
+        const escala = 180 / 512;
+
+        ctx.scale(escala, escala);
+        ctx.fillStyle = '#141B18';
+        ctx.fillRect(0, 0, 512, 512);
+
+        ctx.strokeStyle = '#22E58B';
+        ctx.lineWidth = 72;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(190, 130);
+        ctx.lineTo(190, 340);
+        ctx.lineTo(340, 340);
+        ctx.stroke();
+
+        ctx.fillStyle = '#F2F6F4';
+        ctx.beginPath();
+        ctx.arc(340, 170, 42, 0, Math.PI * 2);
+        ctx.fill();
+
+        document.getElementById('icono-apple').href = lienzo.toDataURL('image/png');
+      } catch { /* Si falla, queda el icono por defecto */ }
+    }
+
+    // Los service workers solo funcionan en http://localhost o https://
+    function registrarServiceWorker() {
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('sw.js').catch((error) => {
+          console.warn('No se pudo registrar el service worker:', error);
+        });
+      }
+    }
+
+    /* =====================================================================
+       INICIO
+       ===================================================================== */
+    document.querySelectorAll('[data-nombre-app]').forEach((elemento) => {
+      elemento.textContent = CONFIG.nombreApp;
+    });
+    cargarCliente();
+    actualizarProgreso();
+    crearIconoApple();
+    registrarServiceWorker();
+  </script>
+</body>
+</html>

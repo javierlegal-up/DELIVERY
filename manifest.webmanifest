@@ -1,0 +1,26 @@
+{
+  "name": "LUNK | Pedidos rápidos",
+  "short_name": "LUNK",
+  "description": "Pide lo que necesites y recíbelo en tu puerta.",
+  "lang": "es",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0F0D",
+  "theme_color": "#0A0F0D",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
