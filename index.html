@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>LUNK | Pedidos rápidos</title>
-  <meta name="description" content="Pide lo que necesites y recíbelo en tu puerta. Tu pedido llega directo al WhatsApp del delivery." />
+  <title>LUNK | Bebidas exprés</title>
+  <meta name="description" content="Pide bebidas en menos de 30 segundos. Tu pedido llega directo al WhatsApp del delivery." />
 
   <!-- Móvil: viewport-fit=cover permite usar toda la pantalla, incluso junto al notch -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -55,9 +55,6 @@
       .etiqueta {
         @apply mb-3 flex items-center gap-2 text-base font-semibold text-texto;
       }
-      .opcional {
-        @apply ml-auto text-sm font-normal text-suave;
-      }
       /* text-base (16px) evita que iOS haga zoom automático al tocar un campo */
       .campo {
         @apply w-full rounded-2xl border border-borde bg-fondo px-4 py-4 text-base text-texto
@@ -65,16 +62,23 @@
                focus:border-acento focus:ring-2 focus:ring-acento/30
                aria-[invalid=true]:border-peligro;
       }
-      .categoria {
-        @apply flex min-h-[64px] items-center gap-3 rounded-2xl border border-borde bg-fondo px-4 py-3
-               text-base font-medium text-texto transition active:scale-[0.98]
+      /* Botón táctil de selección: sirve para las bebidas y para el método de pago */
+      .opcion {
+        @apply relative flex h-full min-h-[72px] items-center gap-3 rounded-2xl border border-borde bg-fondo
+               py-3 pl-3 pr-7 text-[15px] font-medium leading-snug text-texto transition active:scale-[0.98]
                peer-checked:border-acento peer-checked:bg-acento/15
                peer-focus-visible:ring-2 peer-focus-visible:ring-acento;
+      }
+      .tilde {
+        @apply absolute right-2.5 top-2 hidden text-sm font-bold text-acento;
       }
       .error {
         @apply mt-2 text-sm font-medium text-peligro empty:hidden;
       }
     }
+
+    /* El tilde confirma la selección sin depender solo del color */
+    .peer:checked ~ .opcion .tilde { display: block; }
 
     /* Respeta las zonas seguras (notch y barra inferior del teléfono) */
     .zona-superior { padding-top: calc(env(safe-area-inset-top) + 1.5rem); }
@@ -99,9 +103,10 @@
           <circle cx="340" cy="170" r="42" fill="#F2F6F4" />
         </svg>
         <span data-nombre-app class="text-2xl font-extrabold tracking-tight">LUNK</span>
+        <span data-dias-servicio class="ml-auto rounded-full border border-acento/40 bg-acento/10 px-3 py-1 text-sm font-semibold text-acento"></span>
       </div>
-      <h1 class="mt-5 text-3xl font-bold leading-tight">¿Qué necesitas que te llevemos hoy?</h1>
-      <p class="mt-2 text-base text-suave">Completa tus datos y tu pedido llegará directo al WhatsApp del delivery.</p>
+      <h1 class="mt-5 text-3xl font-bold leading-tight">¿Qué bebidas te llevamos hoy?</h1>
+      <p class="mt-2 text-base text-suave">Pide en menos de 30 segundos y lo recibes por WhatsApp.</p>
     </header>
 
     <!-- FORMULARIO -->
@@ -116,74 +121,74 @@
         <p id="error-nombre" class="error"></p>
       </div>
 
-      <!-- Campo 2: Teléfono -->
+      <!-- Campo 2: Dirección -->
       <div class="tarjeta">
-        <label for="telefono" class="etiqueta">📞 Teléfono de contacto</label>
-        <input id="telefono" name="telefono" type="tel" class="campo" maxlength="25"
-               inputmode="tel" autocomplete="tel" enterkeyhint="next"
-               placeholder="Ej: 11 2345 6789" aria-describedby="error-telefono" />
-        <p id="error-telefono" class="error"></p>
-      </div>
-
-      <!-- Campo 3: Categoría (radios reales: funcionan con teclado y lector de pantalla) -->
-      <fieldset class="tarjeta" aria-describedby="error-categoria">
-        <legend class="sr-only">Tipo de pedido</legend>
-        <p class="etiqueta" aria-hidden="true">🏷️ ¿Qué tipo de pedido es?</p>
-        <div class="grid grid-cols-2 gap-3">
-          <label class="cursor-pointer">
-            <input type="radio" name="categoria" value="🛒 Mandados / Super" class="peer sr-only"
-                   data-ejemplo="Ej: 1 kg de pan, 2 leches y un paquete de yerba" />
-            <span class="categoria"><span class="text-2xl" aria-hidden="true">🛒</span> Mandados / Super</span>
-          </label>
-          <label class="cursor-pointer">
-            <input type="radio" name="categoria" value="💊 Farmacia" class="peer sr-only"
-                   data-ejemplo="Ej: Ibuprofeno 400 mg y alcohol en gel. Avísame si necesitan receta" />
-            <span class="categoria"><span class="text-2xl" aria-hidden="true">💊</span> Farmacia</span>
-          </label>
-          <label class="cursor-pointer">
-            <input type="radio" name="categoria" value="📦 Paquetes" class="peer sr-only"
-                   data-ejemplo="Ej: Una caja mediana. Hay que entregarla a Juan Pérez" />
-            <span class="categoria"><span class="text-2xl" aria-hidden="true">📦</span> Paquetes</span>
-          </label>
-          <label class="cursor-pointer">
-            <input type="radio" name="categoria" value="🍔 Comida" class="peer sr-only"
-                   data-ejemplo="Ej: 2 hamburguesas completas y una gaseosa de 1,5 litros" />
-            <span class="categoria"><span class="text-2xl" aria-hidden="true">🍔</span> Comida</span>
-          </label>
-          <label class="col-span-2 cursor-pointer">
-            <input type="radio" name="categoria" value="❓ Otro" class="peer sr-only"
-                   data-ejemplo="Cuéntanos con detalle qué necesitas" />
-            <span class="categoria"><span class="text-2xl" aria-hidden="true">❓</span> Otro</span>
-          </label>
-        </div>
-        <p id="error-categoria" class="error"></p>
-      </fieldset>
-
-      <!-- Campo 4: Descripción -->
-      <div class="tarjeta">
-        <label for="descripcion" class="etiqueta">📝 ¿Qué necesitas?</label>
-        <textarea id="descripcion" name="descripcion" rows="4" class="campo resize-none" maxlength="800"
-                  placeholder="Escribe aquí todo lo que necesitas, con cantidades y detalles"
-                  aria-describedby="error-descripcion"></textarea>
-        <p id="error-descripcion" class="error"></p>
-      </div>
-
-      <!-- Campo 5: Origen (opcional) -->
-      <div class="tarjeta">
-        <label for="origen" class="etiqueta">🏪 ¿Dónde lo buscamos? <span class="opcional">Opcional</span></label>
-        <input id="origen" name="origen" type="text" class="campo" maxlength="120" enterkeyhint="next"
-               placeholder="Ej: Farmacia del Pueblo o A criterio" />
-      </div>
-
-      <!-- Campo 6: Dirección -->
-      <div class="tarjeta">
-        <label for="direccion" class="etiqueta">📍 ¿A dónde lo llevamos?</label>
+        <label for="direccion" class="etiqueta">📍 Dirección de entrega</label>
         <textarea id="direccion" name="direccion" rows="2" class="campo resize-none" maxlength="200"
                   autocomplete="street-address"
-                  placeholder="Calle, número y referencias. Ej: San Martín 123, casa con portón verde, frente a la plaza"
+                  placeholder="Ej: Calle San Martín 230, casa rejas negras"
                   aria-describedby="error-direccion"></textarea>
         <p id="error-direccion" class="error"></p>
       </div>
+
+      <!-- Campo 3: Bebidas. Los botones permiten varias opciones (checkbox) y se suman al detalle escrito -->
+      <fieldset class="tarjeta" aria-describedby="error-pedido">
+        <legend class="sr-only">Bebidas que necesitas</legend>
+        <p class="etiqueta" aria-hidden="true">🛒 ¿Qué bebidas necesitas?</p>
+        <p class="-mt-2 mb-3 text-sm text-suave">Toca una o varias opciones, o escríbelo abajo.</p>
+
+        <div class="grid grid-cols-2 gap-3">
+          <label class="cursor-pointer">
+            <input type="checkbox" name="categoria" value="Cerveza" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">🍺</span> Cerveza (Pack / Latas / Latones)<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="checkbox" name="categoria" value="Hielo / Agua" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">🧊</span> Hielo / Agua<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="checkbox" name="categoria" value="Fernet / Whiskies / Aperitivos" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">🥃</span> Fernet / Whiskies / Aperitivos<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="checkbox" name="categoria" value="Vinos / Espumantes" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">🍷</span> Vinos / Espumantes<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="checkbox" name="categoria" value="Gaseosas / Sodas / Energizantes" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">🥤</span> Gaseosas / Sodas / Energizantes<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="checkbox" name="categoria" value="Pedido general / Otro" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">🛒</span> Pedido General / Otro<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+        </div>
+
+        <label for="pedido" class="sr-only">Detalle de las bebidas</label>
+        <textarea id="pedido" name="pedido" rows="5" class="campo mt-4 resize-none" maxlength="800"
+                  placeholder="Ej: 2 latones de cerveza, 1 bolsa de hielo y una Coca de 2L"
+                  aria-describedby="error-pedido"></textarea>
+        <p id="error-pedido" class="error"></p>
+      </fieldset>
+
+      <!-- Campo 4: Método de pago (radio: solo se puede elegir uno) -->
+      <fieldset class="tarjeta" aria-describedby="error-pago">
+        <legend class="sr-only">Método de pago</legend>
+        <p class="etiqueta" aria-hidden="true">💳 ¿Cómo prefieres pagar?</p>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" name="pago" value="Efectivo" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">💵</span> Efectivo<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="pago" value="Transferencia Mercado Pago" class="peer sr-only" />
+            <span class="opcion"><span class="text-2xl" aria-hidden="true">📲</span> Transferencia Mercado Pago<span class="tilde" aria-hidden="true">✓</span></span>
+          </label>
+        </div>
+        <p id="error-pago" class="error"></p>
+      </fieldset>
+
+      <p class="px-2 text-center text-sm text-suave">Venta de alcohol solo a mayores de 18 años.</p>
 
       <!-- BARRA INFERIOR FIJA: progreso y botón principal -->
       <div class="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-fondo via-fondo to-fondo/0 pt-8">
@@ -199,7 +204,7 @@
 
           <button type="submit"
                   class="w-full rounded-2xl bg-acento px-5 py-[18px] text-lg font-bold text-fondo shadow-acento transition active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-acento/50">
-            📦 Enviar Pedido por WhatsApp
+            🍻 Pedir Bebidas por WhatsApp
           </button>
         </div>
       </div>
@@ -237,6 +242,9 @@
       // Nombre visible en la app y en el mensaje.
       // Si lo cambias, edítalo también en manifest.webmanifest y en las etiquetas <title> y apple-mobile-web-app-title.
       nombreApp: 'LUNK',
+
+      // Texto informativo del encabezado. No bloquea pedidos en otros días.
+      diasServicio: 'Viernes y sábados',
     };
 
     // Valor de ejemplo: mientras siga puesto, la app no intentará abrir WhatsApp.
@@ -250,36 +258,35 @@
     const aviso = document.getElementById('aviso');
     const barraProgreso = document.getElementById('barra-progreso');
     const textoProgreso = document.getElementById('texto-progreso');
-    const descripcion = document.getElementById('descripcion');
-    const textoDescripcionInicial = descripcion.placeholder;
+    const OPCION_GENERAL = 'Pedido general / Otro';
 
     // Lee un valor del formulario, sin espacios sobrantes
     const leer = (nombre) => (formulario.elements[nombre].value || '').trim();
 
+    // Devuelve las bebidas marcadas con los botones
+    const categoriasElegidas = () =>
+      [...formulario.querySelectorAll('input[name="categoria"]:checked')].map((opcion) => opcion.value);
+
     // Campos obligatorios: cada uno indica cómo validarse y qué decirle al usuario
     const OBLIGATORIOS = {
       nombre: {
-        esValido: (valor) => valor.length >= 2,
+        esValido: () => leer('nombre').length >= 2,
         mensaje: 'Escribe tu nombre y apellido.',
       },
-      telefono: {
-        esValido: (valor) => {
-          const digitos = valor.replace(/\D/g, '').length;
-          return digitos >= 6 && digitos <= 15;
-        },
-        mensaje: 'Escribe un teléfono válido para poder contactarte.',
-      },
-      categoria: {
-        esValido: (valor) => valor !== '',
-        mensaje: 'Elige el tipo de pedido.',
-      },
-      descripcion: {
-        esValido: (valor) => valor !== '',
-        mensaje: 'Cuéntanos qué necesitas.',
-      },
       direccion: {
-        esValido: (valor) => valor !== '',
+        esValido: () => leer('direccion') !== '',
         mensaje: 'Escribe la dirección de entrega.',
+      },
+      pedido: {
+        // Basta con un toque en una bebida o con el detalle escrito.
+        // "Otro" por sí solo no dice qué llevar, así que además pide el detalle.
+        esValido: () =>
+          leer('pedido') !== '' || categoriasElegidas().some((categoria) => categoria !== OPCION_GENERAL),
+        mensaje: 'Elige una bebida o escribe qué necesitas.',
+      },
+      pago: {
+        esValido: () => leer('pago') !== '',
+        mensaje: 'Elige cómo prefieres pagar.',
       },
     };
 
@@ -287,11 +294,11 @@
        VALIDACIÓN Y PROGRESO
        ===================================================================== */
     function mostrarError(nombre, mensaje) {
-      const error = document.getElementById(`error-${nombre}`);
-      error.textContent = mensaje; // Sin texto, el párrafo se oculta solo (empty:hidden)
+      // Sin texto, el párrafo se oculta solo (empty:hidden)
+      document.getElementById(`error-${nombre}`).textContent = mensaje;
 
-      // La categoría es un grupo de radios y se marca solo con el texto de error
-      if (nombre !== 'categoria') {
+      // El pago es un grupo de botones y se marca solo con el texto de error
+      if (nombre !== 'pago') {
         formulario.elements[nombre].setAttribute('aria-invalid', mensaje ? 'true' : 'false');
       }
     }
@@ -301,7 +308,7 @@
       let primeroConError = null;
 
       for (const [nombre, regla] of Object.entries(OBLIGATORIOS)) {
-        const valido = regla.esValido(leer(nombre));
+        const valido = regla.esValido();
         mostrarError(nombre, valido ? '' : regla.mensaje);
         if (!valido && !primeroConError) primeroConError = nombre;
       }
@@ -309,8 +316,8 @@
     }
 
     function irAlCampo(nombre) {
-      const elemento = nombre === 'categoria'
-        ? formulario.querySelector('input[name="categoria"]')
+      const elemento = nombre === 'pago'
+        ? formulario.querySelector('input[name="pago"]')
         : formulario.elements[nombre];
 
       elemento.focus({ preventScroll: true });
@@ -318,13 +325,13 @@
     }
 
     function actualizarProgreso() {
-      const reglas = Object.entries(OBLIGATORIOS);
-      const completos = reglas.filter(([nombre, regla]) => regla.esValido(leer(nombre))).length;
+      const reglas = Object.values(OBLIGATORIOS);
+      const completos = reglas.filter((regla) => regla.esValido()).length;
       const faltan = reglas.length - completos;
 
       barraProgreso.style.width = `${(completos / reglas.length) * 100}%`;
       textoProgreso.textContent =
-        faltan === 0 ? '¡Listo para enviar!' : faltan === 1 ? 'Falta 1 dato' : `Faltan ${faltan} datos`;
+        faltan === 0 ? '¡Listo para pedir!' : faltan === 1 ? 'Falta 1 dato' : `Faltan ${faltan} datos`;
     }
 
     function mostrarAviso(mensaje) {
@@ -335,19 +342,18 @@
     /* =====================================================================
        MENSAJE Y ENLACE DE WHATSAPP
        ===================================================================== */
+    // Une las bebidas marcadas con el detalle escrito
+    function construirPedido() {
+      return [categoriasElegidas().join(' + '), leer('pedido')].filter(Boolean).join('\n');
+    }
+
     function construirMensaje() {
       return [
-        `📦 *NUEVO PEDIDO - ${CONFIG.nombreApp}*`,
-        '',
+        `📦 *PEDIDO RÁPIDO DE BEBIDAS - ${CONFIG.nombreApp}*`,
         `👤 *Cliente:* ${leer('nombre')}`,
-        `📞 *Teléfono:* ${leer('telefono')}`,
-        `🏷️ *Categoría:* ${leer('categoria')}`,
-        '',
-        '📝 *Pedido:*',
-        leer('descripcion'),
-        '',
-        `🏪 *Buscar en:* ${leer('origen') || 'A criterio'}`,
-        `📍 *Entregar en:* ${leer('direccion')}`,
+        `📍 *Dirección:* ${leer('direccion')}`,
+        `🛒 *Pedido:* ${construirPedido()}`,
+        `💳 *Pago:* ${leer('pago')}`,
       ].join('\n');
     }
 
@@ -357,11 +363,11 @@
     }
 
     /* =====================================================================
-       DATOS RECORDADOS: nombre, teléfono y dirección quedan solo en este
-       teléfono, para no volver a escribirlos en el próximo pedido
+       DATOS RECORDADOS: nombre y dirección quedan solo en este teléfono,
+       para que el próximo pedido sea todavía más rápido
        ===================================================================== */
     const CLAVE_CLIENTE = 'lunk-cliente';
-    const CAMPOS_RECORDADOS = ['nombre', 'telefono', 'direccion'];
+    const CAMPOS_RECORDADOS = ['nombre', 'direccion'];
 
     function guardarCliente() {
       try {
@@ -415,19 +421,12 @@
     });
 
     // Al corregir un campo, su error desaparece y se actualiza el progreso
-    formulario.addEventListener('input', (evento) => {
-      const nombre = evento.target.name;
-      const regla = OBLIGATORIOS[nombre];
-      if (regla && regla.esValido(leer(nombre))) mostrarError(nombre, '');
+    formulario.addEventListener('input', () => {
+      for (const [nombre, regla] of Object.entries(OBLIGATORIOS)) {
+        if (regla.esValido()) mostrarError(nombre, '');
+      }
       mostrarAviso('');
       actualizarProgreso();
-    });
-
-    // El ejemplo de la descripción cambia según la categoría elegida
-    formulario.addEventListener('change', (evento) => {
-      if (evento.target.name === 'categoria') {
-        descripcion.placeholder = evento.target.dataset.ejemplo;
-      }
     });
 
     // Enter en un campo de una línea no debe enviar el pedido antes de tiempo
@@ -437,12 +436,12 @@
       }
     });
 
-    // Otro pedido: se limpia el pedido y se conservan los datos del cliente
+    // Otro pedido: se limpia el pedido y se conservan el nombre y la dirección
     document.getElementById('nuevo-pedido').addEventListener('click', () => {
-      formulario.querySelectorAll('input[name="categoria"]').forEach((radio) => { radio.checked = false; });
-      formulario.elements.descripcion.value = '';
-      formulario.elements.origen.value = '';
-      descripcion.placeholder = textoDescripcionInicial;
+      formulario.querySelectorAll('input[name="categoria"], input[name="pago"]').forEach((opcion) => {
+        opcion.checked = false;
+      });
+      formulario.elements.pedido.value = '';
 
       pantallaFinal.classList.add('hidden');
       formulario.classList.remove('hidden');
@@ -499,6 +498,7 @@
     document.querySelectorAll('[data-nombre-app]').forEach((elemento) => {
       elemento.textContent = CONFIG.nombreApp;
     });
+    document.querySelector('[data-dias-servicio]').textContent = CONFIG.diasServicio;
     cargarCliente();
     actualizarProgreso();
     crearIconoApple();

@@ -1,7 +1,7 @@
 {
-  "name": "LUNK | Pedidos rápidos",
+  "name": "LUNK | Bebidas exprés",
   "short_name": "LUNK",
-  "description": "Pide lo que necesites y recíbelo en tu puerta.",
+  "description": "Pide bebidas en menos de 30 segundos por WhatsApp.",
   "lang": "es",
   "start_url": "./index.html",
   "scope": "./",
