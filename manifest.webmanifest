@@ -1,26 +1,20 @@
 {
-  "name": "LUNK | Bebidas exprés",
-  "short_name": "LUNK",
+  "name": "Sol Delivery | Bebidas exprés",
+  "short_name": "Sol Delivery",
   "description": "Pide bebidas en menos de 30 segundos por WhatsApp.",
   "lang": "es",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0A0F0D",
-  "theme_color": "#0A0F0D",
+  "background_color": "#071033",
+  "theme_color": "#071033",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "fotos/logo.webp",
+      "sizes": "640x640",
+      "type": "image/webp",
       "purpose": "any"
-    },
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
     }
   ]
 }

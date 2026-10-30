@@ -2,26 +2,31 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>LUNK | Bebidas exprés</title>
+  <title>Sol Delivery | Bebidas exprés</title>
   <meta name="description" content="Pide bebidas en menos de 30 segundos. Tu pedido llega directo al WhatsApp del delivery." />
 
   <!-- Móvil: viewport-fit=cover permite usar toda la pantalla, incluso junto al notch -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0A0F0D" />
+  <meta name="theme-color" content="#071033" />
 
   <!-- PWA: Android / Chrome -->
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="icon" href="fotos/logo.webp" type="image/webp" />
 
   <!-- PWA: iPhone / iPad (el icono PNG se genera más abajo, porque iOS no admite SVG aquí) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="LUNK" />
-  <link id="icono-apple" rel="apple-touch-icon" href="icon.svg" />
+  <meta name="apple-mobile-web-app-title" content="Sol Delivery" />
+  <link id="icono-apple" rel="apple-touch-icon" href="fotos/logo.webp" />
 
   <!-- Evita el destello blanco mientras carga Tailwind -->
-  <style>html, body { background: #0A0F0D; }</style>
+  <style>html, body { background: #071033; }</style>
+
+  <!-- Tipografía Inter. Sin conexión, la app usa la letra del sistema -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
 
   <!-- Tailwind por CDN: sin instalación, ideal para probar de inmediato -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -29,18 +34,27 @@
     tailwind.config = {
       theme: {
         extend: {
+          // Paleta de colores: cámbiala aquí y se actualiza en toda la app
           colors: {
-            fondo: '#0A0F0D',
-            tarjeta: '#141B18',
-            borde: '#2A3530',
-            texto: '#F2F6F4',
-            suave: '#A3B1AA',
-            acento: '#22E58B',
-            peligro: '#FF8A8A',
+            // Tomada del logo: azul de fondo, sol amarillo y cinta roja
+            fondo: '#071033',
+            tarjeta: '#0F1C52',
+            borde: 'rgba(255, 255, 255, 0.16)',
+            texto: '#FFFFFF',
+            suave: '#C3CCEB',
+            acento: '#FFC400',           // Amarillo sol para acciones y selecciones
+            'acento-oscuro': '#F2A900',
+            amarillo: '#FFD84D',         // Destacados y avisos
+            rojo: '#E3202B',             // Etiquetas y banner publicitario
+            'portada-inicio': '#0A2A8C', // Inicio del degradado de la portada
+            'portada-fin': '#071033',    // Final del degradado de la portada
+            peligro: '#FF9A9A',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
           },
           boxShadow: {
-            suave: '0 8px 24px rgba(0, 0, 0, 0.35)',
-            acento: '0 10px 28px rgba(34, 229, 139, 0.28)',
+            acento: '0 0 22px rgba(255, 196, 0, 0.4)',
           },
         },
       },
@@ -50,27 +64,44 @@
   <style type="text/tailwindcss">
     @layer components {
       .tarjeta {
-        @apply rounded-3xl border border-borde bg-tarjeta p-5 shadow-suave;
+        @apply rounded-[14px] border border-borde bg-tarjeta p-4;
       }
       .etiqueta {
-        @apply mb-3 flex items-center gap-2 text-base font-semibold text-texto;
+        @apply mb-3 flex items-center gap-2.5 text-base font-bold text-texto;
+      }
+      /* Iconos de línea: mismo tamaño y trazo en cualquier teléfono, a diferencia de los emojis */
+      .icono {
+        @apply h-5 w-5 flex-none;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .marco-icono {
+        @apply flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-acento/15 text-acento;
+      }
+      .boton-principal {
+        @apply relative flex min-h-[58px] w-full select-none items-center justify-center overflow-hidden gap-2 rounded-xl bg-acento px-3 py-4 text-center text-lg font-bold leading-tight text-fondo
+               shadow-acento transition hover:bg-acento-oscuro active:scale-[0.96]
+               focus:outline-none focus-visible:ring-4 focus-visible:ring-acento/50;
       }
       /* text-base (16px) evita que iOS haga zoom automático al tocar un campo */
       .campo {
-        @apply w-full rounded-2xl border border-borde bg-fondo px-4 py-4 text-base text-texto
+        @apply w-full rounded-xl border border-borde bg-fondo px-4 py-4 text-base text-texto
                placeholder:text-suave/70 outline-none transition
                focus:border-acento focus:ring-2 focus:ring-acento/30
                aria-[invalid=true]:border-peligro;
       }
       /* Botón táctil de selección: sirve para las bebidas y para el método de pago */
       .opcion {
-        @apply relative flex h-full min-h-[72px] items-center gap-3 rounded-2xl border border-borde bg-fondo
-               py-3 pl-3 pr-7 text-[15px] font-medium leading-snug text-texto transition active:scale-[0.98]
+        @apply relative flex h-full min-h-[64px] select-none items-center gap-2 overflow-hidden rounded-xl border border-borde bg-fondo
+               py-2 pl-2.5 pr-5 text-[13px] font-medium leading-snug text-texto transition [overflow-wrap:anywhere] active:scale-[0.95]
                peer-checked:border-acento peer-checked:bg-acento/15
                peer-focus-visible:ring-2 peer-focus-visible:ring-acento;
       }
       .tilde {
-        @apply absolute right-2.5 top-2 hidden text-sm font-bold text-acento;
+        @apply absolute right-2.5 top-2.5 hidden text-acento;
       }
       .error {
         @apply mt-2 text-sm font-medium text-peligro empty:hidden;
@@ -81,8 +112,166 @@
     .peer:checked ~ .opcion .tilde { display: block; }
 
     /* Respeta las zonas seguras (notch y barra inferior del teléfono) */
-    .zona-superior { padding-top: calc(env(safe-area-inset-top) + 1.5rem); }
-    .zona-inferior { padding-bottom: calc(env(safe-area-inset-bottom) + 0.875rem); }
+    .zona-superior { padding-top: calc(env(safe-area-inset-top) + 0.625rem); }
+    .zona-inferior { padding-bottom: calc(env(safe-area-inset-bottom) + 0.75rem); }
+
+    /* Desplazamiento táctil: sin rebote lateral ni espera al tocar.
+       scroll-padding evita que un campo enfocado quede bajo el encabezado o la barra inferior. */
+    html {
+      overflow-x: clip;
+      overscroll-behavior-y: none;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      scroll-padding-top: 5rem;
+      scroll-padding-bottom: calc(var(--alto-barra, 11rem) + 1rem);
+    }
+
+    /* Reserva al final del formulario el alto real de la barra inferior (se mide con JavaScript) */
+    .relleno-barra { padding-bottom: calc(var(--alto-barra, 11rem) + 1rem); }
+
+    /* Barra inferior fija. Con el teclado abierto se desliza fuera de la pantalla
+       para no tapar lo que se escribe; así tampoco cambia el alto de la página. */
+    .barra-inferior { transition: transform 0.2s ease, opacity 0.2s ease; }
+    .teclado-abierto .barra-inferior {
+      transform: translateY(110%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Línea de color bajo el encabezado */
+    .linea-marca {
+      height: 2px;
+      background: linear-gradient(90deg, #FFC400, #FF9800, #E3202B);
+    }
+
+    /* ---------- INTERACCIÓN DE LOS BOTONES ---------- */
+
+    /* Al elegir una opción: rebote, brillo e icono resaltado */
+    .peer:checked ~ .opcion {
+      animation: elegir-opcion 0.28s ease-out;
+      box-shadow: 0 0 16px rgba(255, 196, 0, 0.3);
+    }
+    .peer:checked ~ .opcion > .icono { transform: scale(1.15); }
+    .opcion > .icono { transition: transform 0.2s ease; }
+    .peer:checked ~ .opcion .tilde { animation: aparecer-tilde 0.25s ease-out; }
+
+    @keyframes elegir-opcion {
+      0% { transform: scale(0.95); }
+      60% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+    @keyframes aparecer-tilde {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
+    /* Con mouse: las opciones se levantan al pasar por encima (en el celular no aplica) */
+    @media (hover: hover) {
+      .opcion:hover { border-color: #FFC400; transform: translateY(-2px); }
+    }
+
+    /* La tarjeta que se está completando se resalta */
+    .tarjeta { transition: border-color 0.2s ease; }
+    .tarjeta:focus-within { border-color: rgba(255, 196, 0, 0.6); }
+
+    /* Onda que sale desde el punto donde se toca */
+    .onda-toque {
+      position: absolute;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.25;
+      pointer-events: none;
+      transform: scale(0);
+      animation: expandir-onda 0.5s ease-out forwards;
+    }
+    @keyframes expandir-onda {
+      to { transform: scale(1); opacity: 0; }
+    }
+
+    /* Botón de pedir con todo completo: late y le pasa un reflejo para invitar a tocarlo */
+    .boton-listo { animation: latido-boton 1.6s ease-in-out infinite; }
+    .boton-listo::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+      animation: reflejo-boton 2.4s ease-in-out infinite;
+    }
+    @keyframes latido-boton {
+      0%, 100% { box-shadow: 0 0 14px rgba(255, 196, 0, 0.35); }
+      50% { box-shadow: 0 0 30px rgba(255, 196, 0, 0.8); }
+    }
+    @keyframes reflejo-boton {
+      0% { transform: translateX(-100%); }
+      60%, 100% { transform: translateX(100%); }
+    }
+
+    /* Si falta un dato, su tarjeta se sacude */
+    .sacudir { animation: sacudir-tarjeta 0.4s ease-in-out; }
+    @keyframes sacudir-tarjeta {
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .peer:checked ~ .opcion,
+      .peer:checked ~ .opcion .tilde,
+      .boton-listo,
+      .boton-listo::after,
+      .sacudir { animation: none; }
+    }
+
+    /* El logo chico del encabezado aparece solo cuando el logo grande de la portada ya no se ve */
+    #logo-encabezado { transition: width 0.2s ease, margin 0.2s ease, opacity 0.2s ease; }
+    .logo-portada-visible #logo-encabezado {
+      width: 0;
+      margin-right: -0.75rem;
+      opacity: 0;
+    }
+
+    /* Banner publicitario: rayos de sol que salen desde detrás del logo */
+    .banner-finde {
+      background:
+        repeating-conic-gradient(from 0deg at calc(100% - 54px) 50%, rgba(255, 255, 255, 0.1) 0deg 10deg, transparent 10deg 20deg),
+        linear-gradient(120deg, #E3202B, #A8101A);
+    }
+
+    /* Carrusel de promos: se desliza con el dedo y cada promo encaja en su lugar */
+    .carrusel-promos {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .carrusel-promos::-webkit-scrollbar { display: none; }
+    .carrusel-promos > * { flex: none; width: 100%; scroll-snap-align: center; }
+
+    /* Cinta de marcas en movimiento. La lista está duplicada: al llegar a -50% vuelve
+       al inicio sin que se note. Se pausa al tocarla y si el teléfono pide menos animación. */
+    .cinta-marcas { overflow: hidden; }
+    .pista-marcas {
+      display: flex;
+      width: max-content;
+      animation: desplazar-marcas 45s linear infinite;
+    }
+    .cinta-marcas:hover .pista-marcas,
+    .cinta-marcas:active .pista-marcas { animation-play-state: paused; }
+    @keyframes desplazar-marcas {
+      to { transform: translateX(-50%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cinta-marcas { overflow-x: auto; }
+      .pista-marcas { animation: none; }
+    }
+
+    /* El título se adapta al ancho del teléfono */
+    .titulo-portada {
+      font-size: clamp(1.85rem, 8.6vw, 2.4rem);
+      letter-spacing: -0.025em;
+    }
 
     @media (prefers-reduced-motion: reduce) {
       * { transition: none !important; scroll-behavior: auto !important; }
@@ -92,81 +281,131 @@
 
 <body class="min-h-screen bg-fondo font-sans text-texto antialiased">
 
-  <div class="mx-auto max-w-md px-4">
+  <!-- ICONOS (diseño de Lucide, licencia ISC). Se usan con: <svg class="icono"><use href="#i-nombre" /></svg> -->
+  <svg class="hidden" aria-hidden="true">
+    <symbol id="i-usuario" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></symbol>
+    <symbol id="i-ubicacion" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></symbol>
+    <symbol id="i-carrito" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1" /><circle cx="19" cy="21" r="1" /><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" /></symbol>
+    <symbol id="i-tarjeta" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></symbol>
+    <symbol id="i-cerveza" viewBox="0 0 24 24"><path d="M17 11h1a3 3 0 0 1 0 6h-1" /><path d="M9 12v6" /><path d="M13 12v6" /><path d="M14 7.5c-1 0-1.44.5-3 .5s-2-.5-3-.5-1.72.5-2.5.5a2.5 2.5 0 0 1 0-5c.78 0 1.57.5 2.5.5S9.44 2 11 2s2 1.5 3 1.5 1.72-.5 2.5-.5a2.5 2.5 0 0 1 0 5c-.78 0-1.5-.5-2.5-.5Z" /><path d="M5 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8" /></symbol>
+    <symbol id="i-hielo" viewBox="0 0 24 24"><path d="M2 12h20" /><path d="M12 2v20" /><path d="m20 16-4-4 4-4" /><path d="m4 8 4 4-4 4" /><path d="m16 4-4 4-4-4" /><path d="m8 20 4-4 4 4" /></symbol>
+    <symbol id="i-vaso" viewBox="0 0 24 24"><path d="M15.2 22H8.8a2 2 0 0 1-2-1.79L5 3h14l-1.81 17.21A2 2 0 0 1 15.2 22Z" /><path d="M6 12a5 5 0 0 1 6 0 5 5 0 0 0 6 0" /></symbol>
+    <symbol id="i-vino" viewBox="0 0 24 24"><path d="M8 22h8" /><path d="M7 10h10" /><path d="M12 15v7" /><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z" /></symbol>
+    <symbol id="i-gaseosa" viewBox="0 0 24 24"><path d="m6 8 1.75 12.28a2 2 0 0 0 2 1.72h4.54a2 2 0 0 0 2-1.72L18 8" /><path d="M5 8h14" /><path d="M7 15a6.47 6.47 0 0 1 5 0 6.47 6.47 0 0 0 5 0" /><path d="m12 8 1-6h2" /></symbol>
+    <symbol id="i-bolsa" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></symbol>
+    <symbol id="i-billete" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></symbol>
+    <symbol id="i-celular" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" /><path d="M12 18h.01" /></symbol>
+    <symbol id="i-mensaje" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></symbol>
+    <symbol id="i-tilde" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+  </svg>
 
-    <!-- ENCABEZADO -->
-    <header class="zona-superior pb-6">
-      <div class="flex items-center gap-3">
-        <svg class="h-11 w-11 rounded-xl" viewBox="0 0 512 512" aria-hidden="true">
-          <rect width="512" height="512" fill="#141B18" />
-          <path d="M190 130V340H340" fill="none" stroke="#22E58B" stroke-width="72" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="340" cy="170" r="42" fill="#F2F6F4" />
-        </svg>
-        <span data-nombre-app class="text-2xl font-extrabold tracking-tight">LUNK</span>
-        <span data-dias-servicio class="ml-auto rounded-full border border-acento/40 bg-acento/10 px-3 py-1 text-sm font-semibold text-acento"></span>
-      </div>
-      <h1 class="mt-5 text-3xl font-bold leading-tight">¿Qué bebidas te llevamos hoy?</h1>
-      <p class="mt-2 text-base text-suave">Pide en menos de 30 segundos y lo recibes por WhatsApp.</p>
-    </header>
+  <!-- ENCABEZADO FIJO: siempre visible al bajar por el formulario -->
+  <header class="sticky top-0 z-30 bg-fondo">
+    <div class="zona-superior mx-auto flex max-w-md items-center justify-center gap-3 px-4 pb-2.5">
+      <img id="logo-encabezado" src="fotos/logo.webp" alt="" width="40" height="40" class="h-10 w-10 flex-none rounded-full" />
+      <span class="flex items-center gap-1.5 rounded-full border border-amarillo/40 bg-amarillo/10 px-3 py-1 text-[13px] font-semibold leading-tight text-amarillo">
+        <span class="h-2 w-2 flex-none animate-pulse rounded-full bg-[#22c55e] motion-reduce:animate-none" aria-hidden="true"></span>
+        <span data-estado-atencion></span>
+      </span>
+    </div>
+    <div class="linea-marca"></div>
+  </header>
+
+  <!-- PORTADA -->
+  <section class="bg-gradient-to-br from-portada-inicio to-portada-fin">
+    <div class="mx-auto max-w-md px-4 pb-5 pt-4 text-center">
+      <img id="logo-portada" src="fotos/logo.webp" alt="Logo de De Sol a Sol Minimarket" width="104" height="104"
+           class="mx-auto h-[104px] w-[104px] rounded-full shadow-acento ring-[3px] ring-acento" />
+      <p class="mt-3 inline-block rounded-full bg-rojo px-3 py-1 text-xs font-bold uppercase tracking-[0.1em] text-white">Delivery de bebidas</p>
+      <h1 class="titulo-portada mt-2 font-extrabold leading-[1.1]">
+        ¿Qué <span class="text-acento">bebidas</span> te llevamos hoy?
+      </h1>
+    </div>
+  </section>
+
+  <!-- PUBLICIDAD 1: cinta de marcas. La lista se edita en MARCAS, dentro del script -->
+  <section aria-label="Marcas que llevamos" class="bg-acento py-2.5">
+    <p class="mx-auto mb-2 max-w-md px-4 text-center text-sm font-extrabold uppercase tracking-[0.06em] text-fondo">Las marcas que te llevamos</p>
+    <div class="cinta-marcas">
+      <div id="pista-marcas" class="pista-marcas"></div>
+    </div>
+  </section>
+
+  <div class="mx-auto max-w-md px-4 pt-4">
 
     <!-- FORMULARIO -->
-    <form id="formulario" novalidate class="space-y-4 pb-44">
+    <form id="formulario" novalidate class="relleno-barra space-y-4">
 
       <!-- Campo 1: Nombre -->
       <div class="tarjeta">
-        <label for="nombre" class="etiqueta">👤 Nombre y apellido</label>
+        <label for="nombre" class="etiqueta"><span class="marco-icono"><svg class="icono" aria-hidden="true"><use href="#i-usuario" /></svg></span>Nombre y apellido</label>
         <input id="nombre" name="nombre" type="text" class="campo" maxlength="80"
                autocomplete="name" autocapitalize="words" enterkeyhint="next"
                placeholder="Ej: María Gómez" aria-describedby="error-nombre" />
         <p id="error-nombre" class="error"></p>
-      </div>
 
-      <!-- Campo 2: Dirección -->
-      <div class="tarjeta">
-        <label for="direccion" class="etiqueta">📍 Dirección de entrega</label>
-        <textarea id="direccion" name="direccion" rows="2" class="campo resize-none" maxlength="200"
+        <!-- Campo 2: Dirección (en la misma tarjeta, para acortar la pantalla) -->
+        <label for="direccion" class="etiqueta mt-4"><span class="marco-icono"><svg class="icono" aria-hidden="true"><use href="#i-ubicacion" /></svg></span>Dirección de entrega</label>
+        <button id="usar-ubicacion" type="button"
+                class="boton-ubicacion relative flex min-h-[52px] w-full select-none items-center justify-center gap-2 overflow-hidden rounded-xl border border-acento bg-acento/15 px-3 py-3 text-base font-bold text-acento transition active:scale-[0.96]">
+          <svg class="icono" aria-hidden="true"><use href="#i-ubicacion" /></svg>
+          <span id="texto-boton-ubicacion">Usar mi ubicación actual</span>
+        </button>
+        <div id="ubicacion-lista" class="mt-2 hidden flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border border-acento/40 bg-acento/10 px-3 py-2 text-sm" aria-live="polite">
+          <span id="texto-ubicacion" class="font-semibold"></span>
+          <a id="ver-mapa" href="#" target="_blank" rel="noopener" class="font-bold text-acento underline">Ver en el mapa</a>
+          <button id="quitar-ubicacion" type="button" class="font-bold text-suave underline">Quitar</button>
+        </div>
+        <p id="error-ubicacion" role="alert" class="error"></p>
+        <textarea id="direccion" name="direccion" rows="2" class="campo mt-3 resize-none" maxlength="200"
                   autocomplete="street-address"
-                  placeholder="Ej: Calle San Martín 230, casa rejas negras"
+                  placeholder="O escríbela. Suma referencias: Calle San Martín 230, casa rejas negras"
                   aria-describedby="error-direccion"></textarea>
         <p id="error-direccion" class="error"></p>
       </div>
 
+      <!-- PUBLICIDAD 2: promos del finde. Se editan en la lista PROMOS, al inicio del script -->
+      <section id="promos" aria-label="Promociones">
+        <div id="carrusel-promos" class="carrusel-promos"></div>
+        <div id="puntos-promos" class="mt-2 flex justify-center gap-1.5" aria-hidden="true"></div>
+      </section>
+
       <!-- Campo 3: Bebidas. Los botones permiten varias opciones (checkbox) y se suman al detalle escrito -->
       <fieldset class="tarjeta" aria-describedby="error-pedido">
         <legend class="sr-only">Bebidas que necesitas</legend>
-        <p class="etiqueta" aria-hidden="true">🛒 ¿Qué bebidas necesitas?</p>
-        <p class="-mt-2 mb-3 text-sm text-suave">Toca una o varias opciones, o escríbelo abajo.</p>
+        <p class="etiqueta" aria-hidden="true"><span class="marco-icono"><svg class="icono"><use href="#i-carrito" /></svg></span>¿Qué bebidas necesitas?</p>
+        <p class="-mt-1 mb-3 text-sm leading-relaxed text-suave">Toca las categorías y abajo escribe exactamente qué quieres: marca, tamaño y cantidad.</p>
 
         <div class="grid grid-cols-2 gap-3">
           <label class="cursor-pointer">
             <input type="checkbox" name="categoria" value="Cerveza" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">🍺</span> Cerveza (Pack / Latas / Latones)<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-cerveza" /></svg>Cerveza (Pack / Latas / Latones)<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
           <label class="cursor-pointer">
             <input type="checkbox" name="categoria" value="Hielo / Agua" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">🧊</span> Hielo / Agua<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-hielo" /></svg>Hielo / Agua<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
           <label class="cursor-pointer">
             <input type="checkbox" name="categoria" value="Fernet / Whiskies / Aperitivos" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">🥃</span> Fernet / Whiskies / Aperitivos<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-vaso" /></svg>Fernet / Whiskies / Aperitivos<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
           <label class="cursor-pointer">
             <input type="checkbox" name="categoria" value="Vinos / Espumantes" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">🍷</span> Vinos / Espumantes<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-vino" /></svg>Vinos / Espumantes<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
           <label class="cursor-pointer">
             <input type="checkbox" name="categoria" value="Gaseosas / Sodas / Energizantes" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">🥤</span> Gaseosas / Sodas / Energizantes<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-gaseosa" /></svg>Gaseosas / Sodas / Energizantes<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
           <label class="cursor-pointer">
             <input type="checkbox" name="categoria" value="Pedido general / Otro" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">🛒</span> Pedido General / Otro<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-bolsa" /></svg>Pedido General / Otro<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
         </div>
 
         <label for="pedido" class="sr-only">Detalle de las bebidas</label>
-        <textarea id="pedido" name="pedido" rows="5" class="campo mt-4 resize-none" maxlength="800"
-                  placeholder="Ej: 2 latones de cerveza, 1 bolsa de hielo y una Coca de 2L"
+        <textarea id="pedido" name="pedido" rows="3" class="campo mt-4 resize-none" maxlength="800"
+                  placeholder="Ej: 2 latones de cerveza Quilmes, 1 bolsa de hielo y una Coca de 2L"
                   aria-describedby="error-pedido"></textarea>
         <p id="error-pedido" class="error"></p>
       </fieldset>
@@ -174,25 +413,28 @@
       <!-- Campo 4: Método de pago (radio: solo se puede elegir uno) -->
       <fieldset class="tarjeta" aria-describedby="error-pago">
         <legend class="sr-only">Método de pago</legend>
-        <p class="etiqueta" aria-hidden="true">💳 ¿Cómo prefieres pagar?</p>
+        <p class="etiqueta" aria-hidden="true"><span class="marco-icono"><svg class="icono"><use href="#i-tarjeta" /></svg></span>¿Cómo prefieres pagar?</p>
         <div class="grid grid-cols-2 gap-3">
           <label class="cursor-pointer">
             <input type="radio" name="pago" value="Efectivo" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">💵</span> Efectivo<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-billete" /></svg>Efectivo<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
           <label class="cursor-pointer">
             <input type="radio" name="pago" value="Transferencia Mercado Pago" class="peer sr-only" />
-            <span class="opcion"><span class="text-2xl" aria-hidden="true">📲</span> Transferencia Mercado Pago<span class="tilde" aria-hidden="true">✓</span></span>
+            <span class="opcion"><svg class="icono h-6 w-6 text-acento" aria-hidden="true"><use href="#i-celular" /></svg>Transferencia Mercado Pago<span class="tilde" aria-hidden="true"><svg class="icono h-4 w-4"><use href="#i-tilde" /></svg></span></span>
           </label>
         </div>
+        <p id="nota-pago" aria-live="polite" class="mt-3 rounded-xl border border-amarillo/30 bg-amarillo/10 px-3 py-2 text-sm text-texto empty:hidden"></p>
         <p id="error-pago" class="error"></p>
       </fieldset>
 
-      <p class="px-2 text-center text-sm text-suave">Venta de alcohol solo a mayores de 18 años.</p>
+      <p class="px-2 text-center text-sm text-suave">
+        El delivery te confirma los precios y el total por WhatsApp.
+      </p>
 
-      <!-- BARRA INFERIOR FIJA: progreso y botón principal -->
-      <div class="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-fondo via-fondo to-fondo/0 pt-8">
-        <div class="zona-inferior mx-auto max-w-md px-4">
+      <!-- BARRA INFERIOR FIJA: progreso y botón principal, de borde a borde y con fondo difuminado -->
+      <div id="barra-inferior" class="barra-inferior fixed inset-x-0 bottom-0 z-20 border-t border-borde bg-fondo/85 backdrop-blur-md">
+        <div class="zona-inferior mx-auto max-w-md px-4 pt-3">
           <p id="aviso" role="alert" class="mb-2 hidden rounded-xl border border-peligro/40 bg-tarjeta px-3 py-2 text-sm font-medium text-peligro"></p>
 
           <div class="mb-2 flex items-center gap-3">
@@ -202,9 +444,9 @@
             <span id="texto-progreso" class="text-sm text-suave" aria-live="polite"></span>
           </div>
 
-          <button type="submit"
-                  class="w-full rounded-2xl bg-acento px-5 py-[18px] text-lg font-bold text-fondo shadow-acento transition active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-acento/50">
-            🍻 Pedir Bebidas por WhatsApp
+          <button type="submit" class="boton-principal">
+            <svg class="icono h-[22px] w-[22px]" aria-hidden="true"><use href="#i-mensaje" /></svg>
+            Pedir Bebidas por WhatsApp
           </button>
         </div>
       </div>
@@ -213,17 +455,19 @@
     <!-- PANTALLA FINAL: wa.me solo deja el mensaje escrito; el cliente aún debe tocar "Enviar" -->
     <section id="pantalla-final" class="hidden pb-10" aria-labelledby="titulo-final" tabindex="-1">
       <div class="tarjeta text-center">
-        <div class="text-5xl" aria-hidden="true">💬</div>
+        <div class="marco-icono mx-auto h-14 w-14 rounded-2xl" aria-hidden="true"><svg class="icono h-7 w-7"><use href="#i-mensaje" /></svg></div>
         <h2 id="titulo-final" class="mt-4 text-2xl font-bold">Ya casi está</h2>
         <p class="mt-2 text-base text-suave">
           Tu pedido está escrito en WhatsApp. <strong class="text-texto">Toca “Enviar” allí</strong> para que le llegue al delivery.
         </p>
-        <a id="abrir-whatsapp" href="#"
-           class="mt-6 block rounded-2xl bg-acento px-5 py-[18px] text-lg font-bold text-fondo shadow-acento">
+        <p id="recordatorio-comprobante" class="mt-3 hidden rounded-xl border border-amarillo/30 bg-amarillo/10 px-3 py-2 text-sm text-texto">
+          Cuando transfieras, envía el comprobante por ese mismo chat de WhatsApp.
+        </p>
+        <a id="abrir-whatsapp" href="#" class="boton-principal mt-6">
           Abrir WhatsApp de nuevo
         </a>
         <button id="nuevo-pedido" type="button"
-                class="mt-3 w-full rounded-2xl border border-borde px-5 py-4 text-base font-semibold text-texto">
+                class="mt-3 w-full rounded-xl border border-borde px-5 py-4 text-base font-semibold text-texto">
           Hacer otro pedido
         </button>
       </div>
@@ -241,11 +485,52 @@
 
       // Nombre visible en la app y en el mensaje.
       // Si lo cambias, edítalo también en manifest.webmanifest y en las etiquetas <title> y apple-mobile-web-app-title.
-      nombreApp: 'LUNK',
+      nombreApp: 'Sol Delivery',
 
-      // Texto informativo del encabezado. No bloquea pedidos en otros días.
-      diasServicio: 'Viernes y sábados',
+      // Texto fijo del encabezado: se muestra siempre, no depende del horario real.
+      estadoAtencion: 'Estamos atendiendo',
     };
+
+    // PROMOS DEL FINDE: edita esta lista cada semana. Si la dejas vacía, el banner desaparece.
+    //   etiqueta: texto corto del recuadro amarillo
+    //   titulo:   el anuncio principal
+    //   detalle:  línea chica debajo del título
+    //   imagen:   foto dentro de fotos/ (en formato .webp)
+    //   agregar:  texto que se suma al pedido al tocar el botón. Sin esta línea, no hay botón.
+    const PROMOS = [
+      {
+        etiqueta: 'Oferta del finde',
+        titulo: 'Colón en oferta',
+        detalle: 'Solo este finde',
+        imagen: 'fotos/logo.webp',
+        agregar: 'Colón en oferta',
+      },
+      {
+        etiqueta: 'Noches de finde',
+        titulo: 'Bebidas siempre heladas',
+        detalle: 'Directo a tu puerta',
+        imagen: 'fotos/logo.webp',
+      },
+    ];
+
+    // Cinta publicitaria. Para quitar una marca, borra su línea; para sumar una, agrega su imagen a marcas/.
+    const MARCAS = [
+      { nombre: 'Quilmes 1890', archivo: 'images-(4).webp' },
+      { nombre: 'Coca-Cola', archivo: 'images.webp' },
+      { nombre: 'Heineken', archivo: 'images-(5).webp' },
+      { nombre: 'Fanta', archivo: 'images-(16).webp' },
+      { nombre: 'Stella Artois', archivo: 'images-(7).webp' },
+      { nombre: 'Gancia', archivo: 'images-(3).webp' },
+      { nombre: 'Corona', archivo: 'images-(10).webp' },
+      { nombre: 'Pepsi', archivo: 'images-(17).webp' },
+      { nombre: 'Patagonia', archivo: 'images-(6).webp' },
+      { nombre: 'Secco', archivo: 'images-(19).webp' },
+      { nombre: 'Imperial', archivo: 'images-(8).webp' },
+      { nombre: 'Andes Origen', archivo: 'images-(9).webp' },
+      { nombre: 'Isenbeck', archivo: 'images-(11).webp' },
+      { nombre: 'Amstel', archivo: 'images-(12).webp' },
+      { nombre: 'Miller', archivo: 'images-(13).webp' },
+    ];
 
     // Valor de ejemplo: mientras siga puesto, la app no intentará abrir WhatsApp.
     const NUMERO_DE_EJEMPLO = '5490000000000';
@@ -258,7 +543,14 @@
     const aviso = document.getElementById('aviso');
     const barraProgreso = document.getElementById('barra-progreso');
     const textoProgreso = document.getElementById('texto-progreso');
-    const OPCION_GENERAL = 'Pedido general / Otro';
+    const notaPago = document.getElementById('nota-pago');
+    const PAGO_TRANSFERENCIA = 'Transferencia Mercado Pago';
+
+    // La app no muestra precios: cada nota explica cómo sigue el pago según la opción elegida
+    const NOTAS_PAGO = {
+      Efectivo: 'El delivery te confirma el total por WhatsApp y pagas al recibir.',
+      [PAGO_TRANSFERENCIA]: 'El delivery te confirma el total y los datos de pago por WhatsApp. Cuando transfieras, envía el comprobante por ese mismo chat.',
+    };
 
     // Lee un valor del formulario, sin espacios sobrantes
     const leer = (nombre) => (formulario.elements[nombre].value || '').trim();
@@ -267,6 +559,9 @@
     const categoriasElegidas = () =>
       [...formulario.querySelectorAll('input[name="categoria"]:checked')].map((opcion) => opcion.value);
 
+    // Ubicación del cliente para este pedido: { latitud, longitud, precision }. No se guarda en el teléfono.
+    let ubicacion = null;
+
     // Campos obligatorios: cada uno indica cómo validarse y qué decirle al usuario
     const OBLIGATORIOS = {
       nombre: {
@@ -274,15 +569,13 @@
         mensaje: 'Escribe tu nombre y apellido.',
       },
       direccion: {
-        esValido: () => leer('direccion') !== '',
-        mensaje: 'Escribe la dirección de entrega.',
+        esValido: () => ubicacion !== null || leer('direccion') !== '',
+        mensaje: 'Usa tu ubicación o escribe la dirección de entrega.',
       },
       pedido: {
-        // Basta con un toque en una bebida o con el detalle escrito.
-        // "Otro" por sí solo no dice qué llevar, así que además pide el detalle.
-        esValido: () =>
-          leer('pedido') !== '' || categoriasElegidas().some((categoria) => categoria !== OPCION_GENERAL),
-        mensaje: 'Elige una bebida o escribe qué necesitas.',
+        // El detalle es obligatorio: las categorías solas no alcanzan para preparar el pedido ni dar el precio
+        esValido: () => leer('pedido') !== '',
+        mensaje: 'Escribe exactamente qué quieres: marca, tamaño y cantidad.',
       },
       pago: {
         esValido: () => leer('pago') !== '',
@@ -321,7 +614,14 @@
         : formulario.elements[nombre];
 
       elemento.focus({ preventScroll: true });
-      elemento.closest('.tarjeta').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const tarjeta = elemento.closest('.tarjeta');
+      tarjeta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Sacude la tarjeta. Quitar la clase y forzar un redibujado permite repetirlo en cada intento.
+      tarjeta.classList.remove('sacudir');
+      void tarjeta.offsetWidth;
+      tarjeta.classList.add('sacudir');
+      vibrar([30, 40, 30]);
     }
 
     function actualizarProgreso() {
@@ -330,8 +630,13 @@
       const faltan = reglas.length - completos;
 
       barraProgreso.style.width = `${(completos / reglas.length) * 100}%`;
+      formulario.querySelector('button[type="submit"]').classList.toggle('boton-listo', faltan === 0);
       textoProgreso.textContent =
         faltan === 0 ? '¡Listo para pedir!' : faltan === 1 ? 'Falta 1 dato' : `Faltan ${faltan} datos`;
+    }
+
+    function actualizarNotaPago() {
+      notaPago.textContent = NOTAS_PAGO[leer('pago')] || '';
     }
 
     function mostrarAviso(mensaje) {
@@ -348,12 +653,17 @@
     }
 
     function construirMensaje() {
+      const pago = leer('pago') === PAGO_TRANSFERENCIA
+        ? `${PAGO_TRANSFERENCIA} (enviaré el comprobante por este chat)`
+        : leer('pago');
+
       return [
         `📦 *PEDIDO RÁPIDO DE BEBIDAS - ${CONFIG.nombreApp}*`,
         `👤 *Cliente:* ${leer('nombre')}`,
-        `📍 *Dirección:* ${leer('direccion')}`,
+        `📍 *Dirección:* ${leer('direccion') || 'Ver ubicación en el mapa'}`,
+        ...(ubicacion ? [`🗺️ *Mapa:* ${enlaceMapa()}`] : []),
         `🛒 *Pedido:* ${construirPedido()}`,
-        `💳 *Pago:* ${leer('pago')}`,
+        `💳 *Pago:* ${pago}`,
       ].join('\n');
     }
 
@@ -413,6 +723,8 @@
 
       // Se prepara la pantalla final para que esté lista cuando el cliente vuelva de WhatsApp
       document.getElementById('abrir-whatsapp').href = enlace;
+      document.getElementById('recordatorio-comprobante')
+        .classList.toggle('hidden', leer('pago') !== PAGO_TRANSFERENCIA);
       formulario.classList.add('hidden');
       pantallaFinal.classList.remove('hidden');
       window.scrollTo(0, 0);
@@ -426,6 +738,8 @@
         if (regla.esValido()) mostrarError(nombre, '');
       }
       mostrarAviso('');
+      actualizarNotaPago();
+      actualizarBotonesPromo();
       actualizarProgreso();
     });
 
@@ -442,6 +756,9 @@
         opcion.checked = false;
       });
       formulario.elements.pedido.value = '';
+      quitarUbicacion(); // El próximo pedido puede ser desde otro lugar
+      actualizarNotaPago();
+      actualizarBotonesPromo();
 
       pantallaFinal.classList.add('hidden');
       formulario.classList.remove('hidden');
@@ -450,37 +767,312 @@
     });
 
     /* =====================================================================
+       PUBLICIDAD: CINTA DE MARCAS
+       ===================================================================== */
+    function iniciarCintaMarcas() {
+      const crearMarca = ({ nombre, archivo }, esCopia) => {
+        // Fondo blanco porque los logos vienen sobre blanco.
+        // El margen va en cada marca, para que las dos mitades de la cinta midan lo mismo.
+        const marco = document.createElement('div');
+        marco.className = 'mr-3 flex h-16 w-28 flex-none items-center justify-center rounded-xl bg-white p-2 shadow-lg';
+
+        const imagen = document.createElement('img');
+        imagen.src = `marcas/${archivo}`;
+        imagen.alt = esCopia ? '' : nombre;
+        imagen.loading = 'lazy';
+        imagen.decoding = 'async';
+        imagen.className = 'max-h-full max-w-full object-contain';
+
+        marco.append(imagen);
+        return marco;
+      };
+
+      document.getElementById('pista-marcas').append(
+        ...MARCAS.map((marca) => crearMarca(marca, false)),
+        ...MARCAS.map((marca) => crearMarca(marca, true)),
+      );
+    }
+
+    /* =====================================================================
+       UBICACIÓN: el cliente comparte dónde está, una sola vez y con su permiso.
+       Viaja únicamente en el mensaje de WhatsApp, como enlace de Google Maps.
+       ===================================================================== */
+    const PRECISION_DUDOSA_METROS = 100;
+
+    const enlaceMapa = () =>
+      `https://www.google.com/maps/search/?api=1&query=${ubicacion.latitud},${ubicacion.longitud}`;
+
+    // Actualiza progreso y errores usando el mismo camino que cuando el cliente escribe
+    const avisarCambioDireccion = () =>
+      formulario.elements.direccion.dispatchEvent(new Event('input', { bubbles: true }));
+
+    function quitarUbicacion() {
+      ubicacion = null;
+      document.getElementById('ubicacion-lista').classList.add('hidden');
+      document.getElementById('texto-boton-ubicacion').textContent = 'Usar mi ubicación actual';
+      avisarCambioDireccion();
+    }
+
+    function mostrarUbicacion() {
+      const metros = Math.round(ubicacion.precision);
+      document.getElementById('texto-ubicacion').textContent = metros > PRECISION_DUDOSA_METROS
+        ? `Ubicación poco precisa (unos ${metros} m). Suma la dirección abajo.`
+        : `✓ Ubicación lista (unos ${metros} m). Si no estás en el lugar de entrega, quítala.`;
+      document.getElementById('ver-mapa').href = enlaceMapa();
+      document.getElementById('ubicacion-lista').classList.remove('hidden');
+      document.getElementById('texto-boton-ubicacion').textContent = 'Actualizar mi ubicación';
+    }
+
+    function mensajeErrorUbicacion(error) {
+      if (error.code === error.PERMISSION_DENIED) {
+        return 'No diste permiso de ubicación. Actívalo en tu navegador o escribe la dirección.';
+      }
+      if (error.code === error.TIMEOUT) {
+        return 'Tardó demasiado en encontrarte. Prueba de nuevo o escribe la dirección.';
+      }
+      return 'No pudimos encontrarte. Revisa que el GPS esté activado o escribe la dirección.';
+    }
+
+    function pedirUbicacion() {
+      const error = document.getElementById('error-ubicacion');
+      const boton = document.getElementById('usar-ubicacion');
+      const texto = document.getElementById('texto-boton-ubicacion');
+      error.textContent = '';
+
+      // Los navegadores solo entregan la ubicación en páginas seguras (https)
+      if (!window.isSecureContext) {
+        error.textContent = 'La ubicación solo funciona en la página publicada con https. Por ahora, escribe la dirección.';
+        return;
+      }
+      if (!navigator.geolocation) {
+        error.textContent = 'Este teléfono no permite compartir la ubicación. Escribe la dirección.';
+        return;
+      }
+
+      boton.disabled = true;
+      texto.textContent = 'Buscando tu ubicación...';
+
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          ubicacion = { latitud: coords.latitude, longitud: coords.longitude, precision: coords.accuracy };
+          boton.disabled = false;
+          mostrarUbicacion();
+          avisarCambioDireccion();
+          vibrar(12);
+        },
+        (fallo) => {
+          boton.disabled = false;
+          texto.textContent = ubicacion ? 'Actualizar mi ubicación' : 'Usar mi ubicación actual';
+          error.textContent = mensajeErrorUbicacion(fallo);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }
+
+    function iniciarUbicacion() {
+      document.getElementById('usar-ubicacion').addEventListener('click', pedirUbicacion);
+      document.getElementById('quitar-ubicacion').addEventListener('click', quitarUbicacion);
+    }
+
+    /* =====================================================================
+       PUBLICIDAD: PROMOS DEL FINDE
+       ===================================================================== */
+    const botonesPromo = [];
+
+    const yaEstaEnPedido = (texto) =>
+      leer('pedido').toLowerCase().includes(texto.toLowerCase());
+
+    // El botón refleja el pedido: si el cliente borra la promo del texto, vuelve a ofrecerla
+    function actualizarBotonesPromo() {
+      botonesPromo.forEach(({ boton, promo }) => {
+        boton.textContent = yaEstaEnPedido(promo.agregar) ? '✓ En tu pedido' : '+ Agregar al pedido';
+      });
+    }
+
+    // La promo se suma al texto del pedido, así que viaja en el mismo mensaje de WhatsApp
+    function agregarPromoAlPedido(promo) {
+      if (yaEstaEnPedido(promo.agregar)) return;
+
+      const campo = formulario.elements.pedido;
+      const actual = campo.value.trim();
+      campo.value = actual ? `${actual}, ${promo.agregar}` : promo.agregar;
+      campo.dispatchEvent(new Event('input', { bubbles: true })); // Actualiza errores y progreso
+      vibrar(12);
+    }
+
+    function crearPromo(promo) {
+      const tarjeta = document.createElement('article');
+      tarjeta.className = 'banner-finde relative overflow-hidden rounded-[14px] py-3.5 pl-4 pr-28 text-white';
+
+      const etiqueta = document.createElement('p');
+      etiqueta.className = 'inline-block rounded-full bg-acento px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.08em] text-fondo';
+      etiqueta.textContent = promo.etiqueta;
+
+      const titulo = document.createElement('p');
+      titulo.className = 'mt-2 text-xl font-extrabold uppercase leading-[1.05] tracking-tight';
+      titulo.textContent = promo.titulo;
+
+      const detalle = document.createElement('p');
+      detalle.className = 'mt-1 text-sm font-semibold leading-snug';
+      detalle.textContent = promo.detalle;
+
+      tarjeta.append(etiqueta, titulo, detalle);
+
+      if (promo.agregar) {
+        const boton = document.createElement('button');
+        boton.type = 'button'; // Dentro del formulario: sin esto, tocarlo enviaría el pedido
+        boton.className = 'boton-promo relative mt-2.5 min-h-[40px] select-none overflow-hidden rounded-lg bg-white px-3 py-2 text-sm font-bold text-[#A8101A] transition active:scale-[0.95]';
+        boton.addEventListener('click', () => agregarPromoAlPedido(promo));
+        botonesPromo.push({ boton, promo });
+        tarjeta.append(boton);
+      }
+
+      const imagen = document.createElement('img');
+      imagen.src = promo.imagen;
+      imagen.alt = '';
+      imagen.loading = 'lazy';
+      imagen.className = 'absolute right-2.5 top-1/2 h-[88px] w-[88px] -translate-y-1/2 rounded-full object-cover shadow-acento ring-[3px] ring-acento';
+      tarjeta.append(imagen);
+
+      return tarjeta;
+    }
+
+    function iniciarPromos() {
+      const seccion = document.getElementById('promos');
+      const carrusel = document.getElementById('carrusel-promos');
+      const contenedorPuntos = document.getElementById('puntos-promos');
+
+      if (PROMOS.length === 0) {
+        seccion.classList.add('hidden');
+        return;
+      }
+
+      carrusel.append(...PROMOS.map(crearPromo));
+      actualizarBotonesPromo();
+
+      // Con una sola promo no hacen falta puntos ni movimiento
+      if (PROMOS.length === 1) return;
+
+      const puntos = PROMOS.map(() => {
+        const punto = document.createElement('span');
+        punto.className = 'h-1.5 w-1.5 rounded-full bg-white/30 transition-colors';
+        contenedorPuntos.append(punto);
+        return punto;
+      });
+
+      const promoActual = () => Math.round(carrusel.scrollLeft / carrusel.clientWidth);
+      const marcarPunto = () => {
+        puntos.forEach((punto, indice) => {
+          punto.classList.toggle('bg-acento', indice === promoActual());
+          punto.classList.toggle('bg-white/30', indice !== promoActual());
+        });
+      };
+      carrusel.addEventListener('scroll', marcarPunto, { passive: true });
+      marcarPunto();
+
+      // Avanza solo cada 5 segundos, hasta que el cliente toque el banner
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const temporizador = setInterval(() => {
+        const siguiente = (promoActual() + 1) % PROMOS.length;
+        carrusel.scrollTo({ left: siguiente * carrusel.clientWidth, behavior: 'smooth' });
+      }, 5000);
+      carrusel.addEventListener('pointerdown', () => clearInterval(temporizador), { once: true });
+    }
+
+    /* =====================================================================
+       INTERACCIÓN DE LOS BOTONES
+       ===================================================================== */
+    // Vibración corta. Funciona en Android; los navegadores que no la admiten la ignoran.
+    function vibrar(patron) {
+      if (navigator.vibrate) navigator.vibrate(patron);
+    }
+
+    function iniciarInteraccionBotones() {
+      // Safari en iPhone no activa el efecto de "botón hundido" si la página no escucha los toques
+      document.addEventListener('touchstart', () => {}, { passive: true });
+
+      // Onda en el punto exacto del toque
+      document.addEventListener('pointerdown', (evento) => {
+        const boton = evento.target.closest('.opcion, .boton-principal, .boton-promo, .boton-ubicacion');
+        if (!boton || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        const caja = boton.getBoundingClientRect();
+        const diametro = Math.max(caja.width, caja.height) * 2;
+        const onda = document.createElement('span');
+        onda.className = 'onda-toque';
+        onda.style.width = onda.style.height = `${diametro}px`;
+        onda.style.left = `${evento.clientX - caja.left - diametro / 2}px`;
+        onda.style.top = `${evento.clientY - caja.top - diametro / 2}px`;
+        onda.addEventListener('animationend', () => onda.remove());
+        boton.append(onda);
+      });
+
+      // Vibración al elegir una bebida o un método de pago
+      formulario.addEventListener('change', (evento) => {
+        if (evento.target.matches('input[type="checkbox"], input[type="radio"]')) vibrar(12);
+      });
+
+      formulario.addEventListener('animationend', (evento) => {
+        if (evento.animationName === 'sacudir-tarjeta') evento.target.classList.remove('sacudir');
+      });
+    }
+
+    /* =====================================================================
+       LOGO DEL ENCABEZADO
+       ===================================================================== */
+    // Evita ver dos logos juntos arriba. Sin este soporte, el logo chico simplemente queda siempre visible.
+    function iniciarLogoEncabezado() {
+      if (!('IntersectionObserver' in window)) return;
+
+      const raiz = document.documentElement;
+      raiz.classList.add('logo-portada-visible');
+      new IntersectionObserver(
+        ([entrada]) => raiz.classList.toggle('logo-portada-visible', entrada.isIntersecting),
+        { rootMargin: '-64px 0px 0px 0px' } // Descuenta la altura del encabezado fijo
+      ).observe(document.getElementById('logo-portada'));
+    }
+
+    /* =====================================================================
+       BARRA INFERIOR
+       ===================================================================== */
+    function iniciarBarraInferior() {
+      const raiz = document.documentElement;
+      const barra = document.getElementById('barra-inferior');
+
+      // Mide la barra para reservar su alto exacto, incluso cuando aparece un aviso dentro de ella
+      if ('ResizeObserver' in window) {
+        new ResizeObserver(() => {
+          // Con el formulario oculto mide 0: se conserva el último alto válido
+          if (barra.offsetHeight > 0) raiz.style.setProperty('--alto-barra', `${barra.offsetHeight}px`);
+        }).observe(barra);
+      }
+
+      // El teclado achica el área visible. Hacer zoom también, pero no debe ocultar la barra.
+      const vista = window.visualViewport;
+      if (vista) {
+        vista.addEventListener('resize', () => {
+          const tecladoAbierto = vista.scale <= 1.01 && window.innerHeight - vista.height > 150;
+          raiz.classList.toggle('teclado-abierto', tecladoAbierto);
+        });
+      }
+    }
+
+    /* =====================================================================
        PWA
        ===================================================================== */
-    // iOS necesita un icono PNG: se dibuja aquí a partir del mismo diseño de icon.svg
+    // iOS necesita un icono PNG: se genera aquí a partir del logo
     function crearIconoApple() {
-      try {
-        const lienzo = document.createElement('canvas');
-        lienzo.width = lienzo.height = 180;
-        const ctx = lienzo.getContext('2d');
-        const escala = 180 / 512;
-
-        ctx.scale(escala, escala);
-        ctx.fillStyle = '#141B18';
-        ctx.fillRect(0, 0, 512, 512);
-
-        ctx.strokeStyle = '#22E58B';
-        ctx.lineWidth = 72;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.beginPath();
-        ctx.moveTo(190, 130);
-        ctx.lineTo(190, 340);
-        ctx.lineTo(340, 340);
-        ctx.stroke();
-
-        ctx.fillStyle = '#F2F6F4';
-        ctx.beginPath();
-        ctx.arc(340, 170, 42, 0, Math.PI * 2);
-        ctx.fill();
-
-        document.getElementById('icono-apple').href = lienzo.toDataURL('image/png');
-      } catch { /* Si falla, queda el icono por defecto */ }
+      const logo = new Image();
+      logo.onload = () => {
+        try {
+          const lienzo = document.createElement('canvas');
+          lienzo.width = lienzo.height = 180;
+          lienzo.getContext('2d').drawImage(logo, 0, 0, 180, 180);
+          document.getElementById('icono-apple').href = lienzo.toDataURL('image/png');
+        } catch { /* Si falla, queda el icono por defecto */ }
+      };
+      logo.src = 'fotos/logo.webp';
     }
 
     // Los service workers solo funcionan en http://localhost o https://
@@ -498,9 +1090,16 @@
     document.querySelectorAll('[data-nombre-app]').forEach((elemento) => {
       elemento.textContent = CONFIG.nombreApp;
     });
-    document.querySelector('[data-dias-servicio]').textContent = CONFIG.diasServicio;
+    document.querySelector('[data-estado-atencion]').textContent = CONFIG.estadoAtencion;
     cargarCliente();
+    actualizarNotaPago();
     actualizarProgreso();
+    iniciarCintaMarcas();
+    iniciarUbicacion();
+    iniciarPromos();
+    iniciarInteraccionBotones();
+    iniciarLogoEncabezado();
+    iniciarBarraInferior();
     crearIconoApple();
     registrarServiceWorker();
   </script>

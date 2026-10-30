@@ -1,8 +1,8 @@
 /* Service worker de LUNK: permite instalar la app y abrirla rápido, incluso sin conexión.
    Si cambias la lista de archivos o quieres forzar una limpieza, sube la versión. */
-const CACHE = 'lunk-v1';
+const CACHE = 'lunk-v6';
 const TAILWIND = 'https://cdn.tailwindcss.com/3.4.17';
-const ARCHIVOS = ['./index.html', './manifest.webmanifest', './icon.svg'];
+const ARCHIVOS = ['./index.html', './manifest.webmanifest', './fotos/logo.webp'];
 
 // Instalación: guarda los archivos propios y, si se puede, Tailwind
 self.addEventListener('install', (evento) => {
@@ -40,7 +40,8 @@ self.addEventListener('fetch', (evento) => {
     evento.respondWith(
       fetch(request)
         .then((respuesta) => {
-          if (respuesta.ok) {
+          // La página del QR del servidor local no debe guardarse como si fuera la app
+          if (respuesta.ok && !new URL(request.url).pathname.endsWith('/qr')) {
             const copia = respuesta.clone();
             caches.open(CACHE).then((cache) => cache.put('./index.html', copia));
           }

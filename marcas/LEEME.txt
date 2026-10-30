@@ -1,0 +1,31 @@
+LOGOS DE MARCAS - Carrusel "Marcas que encontrás"
+==================================================
+
+Guarda aquí el logo de cada marca con EXACTAMENTE estos nombres:
+
+  coca-cola.png
+  quilmes.png
+  schneider.png
+  arcor.png
+  bagley.png
+  cofler.png
+  bon-o-bon.png
+  mogul.png
+  halls.png
+  chandon.png
+  gancia.png
+  hamlet.png
+
+Recomendaciones:
+  - PNG con FONDO TRANSPARENTE (o SVG). Evitá logos con fondo blanco cuadrado.
+  - Tamaño ideal: unos 300 px de ancho. No hace falta que sean más grandes.
+  - Si usás SVG, cambiá la extensión en contenido.js (ej: "fotos/marcas/arcor.svg").
+
+Dónde conseguirlos:
+  - Sitio oficial de cada marca (sección prensa / media kit), o pedíselos a tu
+    distribuidor o preventista: suelen tener material de marca para comercios.
+  - Wikimedia Commons (commons.wikimedia.org) tiene versiones SVG de muchas marcas.
+
+Si un logo falta, la página muestra el nombre de la marca en texto (no se rompe).
+
+Para agregar o quitar marcas: editá la lista MARCAS en contenido.js.
